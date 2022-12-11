@@ -22,17 +22,17 @@ namespace HouseRentingSystem.Controllers
 
         public IActionResult All([FromQuery] AllHousesQueryModel query)
         {
-            var queryResult = this.houses.All(
-                query.Category,
-                query.SearchTerm,
+            var queryResult = this.houses?.All(
+                query.Category!,
+                query.SearchTerm!,
                 query.Sorting,
                 query.CurrentPage,
                 AllHousesQueryModel.HousesPerPage);
 
-            query.TotalHousesCount = queryResult.TotalHousesCount;
+            query.TotalHousesCount = queryResult!.TotalHousesCount;
             query.Houses = queryResult.Houses;
 
-            var houseCategories = this.houses.AllCategoriesNames();
+            var houseCategories = this.houses!.AllCategoriesNames();
             query.Categories = houseCategories;
 
             return View(query);
@@ -41,7 +41,7 @@ namespace HouseRentingSystem.Controllers
         [Authorize]
         public IActionResult Mine()
         {
-            IEnumerable<HouseServiceModel> myHouses = null;
+            IEnumerable<HouseServiceModel> myHouses = null!;
 
             var userId = this.User.Id();
 
@@ -103,8 +103,8 @@ namespace HouseRentingSystem.Controllers
             }
             var agentId = this.agents.GetAgentId(this.User.Id());
 
-            var newHouseId = this.houses.Create(model.Title, model.Address, model.Description,
-                model.ImageUrl, model.PricePerMonth, model.CategoryId, agentId);
+            var newHouseId = this.houses.Create(model.Title!, model.Address!, model.Description!,
+                model.ImageUrl!, model.PricePerMonth, model.CategoryId, agentId);
 
             return RedirectToAction(nameof(Details), new { id = newHouseId });
         }
@@ -160,9 +160,9 @@ namespace HouseRentingSystem.Controllers
 
                 return View(model);
             }
-            this.houses.Edit(id, model.Title,
-                model.Address, model.Description,
-                model.ImageUrl, model.PricePerMonth,
+            this.houses.Edit(id, model.Title!,
+                model.Address!, model.Description!,
+                model.ImageUrl!, model.PricePerMonth,
                 model.CategoryId);
 
             return RedirectToAction(nameof(Details), new { id = id });
@@ -184,9 +184,9 @@ namespace HouseRentingSystem.Controllers
 
             var model = new HouseDetailsViewModel()
             {
-                Title = house.Title,
-                Address = house.Address,
-                ImageUrl = house.ImageUrl
+                Title = house.Title!,
+                Address = house.Address!,
+                ImageUrl = house.ImageUrl!
             };
             return View(model);
         }

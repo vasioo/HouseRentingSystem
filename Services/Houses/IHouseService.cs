@@ -31,8 +31,8 @@ namespace HouseRentingSystem.Services.Houses
         IEnumerable<HouseServiceModel> AllHousesByUserId(string userId);
 
         HouseQueryServiceModel All(
-            string category = null,
-            string searchTerm = null,
+            string category = null!,
+            string searchTerm = null!,
             HouseSorting sorting = HouseSorting.Newest,
             int currentPage = 1,
             int housesPerPage = 1
