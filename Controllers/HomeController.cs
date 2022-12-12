@@ -1,8 +1,5 @@
-﻿using HouseRentingSystem.Models;
-using HouseRentingSystem.Models.Home;
-using HouseRentingSystem.Services.Houses;
+﻿using HouseRentingSystem.Services.Houses;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
 namespace HouseRentingSystem.Controllers
 {

@@ -1,5 +1,6 @@
 ﻿using HouseRentingSystem.Infrastructure;
 using HouseRentingSystem.Models.Houses;
+using HouseRentingSystem.Models;
 using HouseRentingSystem.Services.Agents;
 using HouseRentingSystem.Services.Houses;
 using HouseRentingSystem.Services.Houses.Models;
@@ -22,7 +23,7 @@ namespace HouseRentingSystem.Controllers
 
         public IActionResult All([FromQuery] AllHousesQueryModel query)
         {
-            var queryResult = this.houses?.All(
+            var queryResult = this.houses.All(
                 query.Category!,
                 query.SearchTerm!,
                 query.Sorting,
@@ -59,7 +60,7 @@ namespace HouseRentingSystem.Controllers
             return View(myHouses);
         }
 
-        public IActionResult Details(int id)
+        public IActionResult Details(int id, string information)
         {
             if (!this.houses.Exists(id))
             {
@@ -67,6 +68,10 @@ namespace HouseRentingSystem.Controllers
             }
             var houseModel = this.houses.HouseDetailsById(id);
 
+            if (information != houseModel.GetInformation())
+            {
+                return BadRequest();
+            }
             return View(houseModel);
         }
 
@@ -101,12 +106,15 @@ namespace HouseRentingSystem.Controllers
                 model.Categories = this.houses.AllCategories();
                 return View(model);
             }
+
             var agentId = this.agents.GetAgentId(this.User.Id());
 
-            var newHouseId = this.houses.Create(model.Title!, model.Address!, model.Description!,
+            var newHouseId = this.houses
+                .Create(model.Title!, model.Address!, model.Description!,
                 model.ImageUrl!, model.PricePerMonth, model.CategoryId, agentId);
 
-            return RedirectToAction(nameof(Details), new { id = newHouseId });
+            return RedirectToAction(nameof(Details),
+                new { id = newHouseId, information = model.GetInformation() });
         }
 
         [Authorize]
@@ -116,7 +124,8 @@ namespace HouseRentingSystem.Controllers
             {
                 return BadRequest();
             }
-            if (!this.houses.HasAgentWithId(id, this.User.Id()))
+            if (!this.houses.HasAgentWithId(id, this.User.Id())
+                && !this.User.IsAdmin())
             {
                 return Unauthorized();
             }
@@ -146,7 +155,8 @@ namespace HouseRentingSystem.Controllers
             {
                 return this.View();
             }
-            if (!this.houses.HasAgentWithId(id, this.User.Id()))
+            if (!this.houses.HasAgentWithId(id, this.User.Id())
+                && this.User.IsAdmin())
             {
                 return Unauthorized();
             }
@@ -165,7 +175,8 @@ namespace HouseRentingSystem.Controllers
                 model.ImageUrl!, model.PricePerMonth,
                 model.CategoryId);
 
-            return RedirectToAction(nameof(Details), new { id = id });
+            return RedirectToAction(nameof(Details),
+                new { id = id, information = model.GetInformation() });
         }
 
         [Authorize]
@@ -175,7 +186,8 @@ namespace HouseRentingSystem.Controllers
             {
                 return BadRequest();
             }
-            if (!this.houses.HasAgentWithId(id, this.User.Id()))
+            if (!this.houses.HasAgentWithId(id, this.User.Id())
+                && !this.User.IsAdmin())
             {
                 return Unauthorized();
             }
@@ -199,7 +211,8 @@ namespace HouseRentingSystem.Controllers
             {
                 return BadRequest();
             }
-            if (!this.houses.HasAgentWithId(model.Id, this.User.Id()))
+            if (!this.houses.HasAgentWithId(model.Id, this.User.Id())
+                && !this.User.IsAdmin())
             {
                 return Unauthorized();
             }
@@ -217,7 +230,8 @@ namespace HouseRentingSystem.Controllers
             {
                 return BadRequest();
             }
-            if (this.agents.ExistsById(this.User.Id()))
+            if (this.agents.ExistsById(this.User.Id())
+                && !this.User.IsAdmin())
             {
                 return Unauthorized();
             }
@@ -234,11 +248,11 @@ namespace HouseRentingSystem.Controllers
         [HttpPost]
         public IActionResult Leave(int id)
         {
-            if (!this.houses.Exists(id)|| !this.houses.IsRented(id))
+            if (!this.houses.Exists(id) || !this.houses.IsRented(id))
             {
                 return BadRequest();
-            } 
-            if (!this.houses.IsRentedByUserWithId(id,this.User.Id()))
+            }
+            if (!this.houses.IsRentedByUserWithId(id, this.User.Id()))
             {
                 return Unauthorized();
             }

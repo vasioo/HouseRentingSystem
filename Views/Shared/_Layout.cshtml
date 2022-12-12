@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@inject IAgentService agents
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -21,18 +23,21 @@
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area=""
-                            asp-controller="Houses" asp-action="All">All Houses</a>
+                               asp-controller="Houses" asp-action="All">All Houses</a>
                         </li>
                         @if (this.User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area=""
-                                asp-controller="Houses" asp-action="Mine">My Houses</a>
+                               asp-controller="Houses" asp-action="Mine">My Houses</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area=""
+                            @if (this.agents.ExistsById(this.User.Id()))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area=""
                                asp-controller="Houses" asp-action="Add">Add Houses</a>
-                            </li>
+                                </li>
+                            }
                         }
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>

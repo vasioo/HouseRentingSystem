@@ -1,7 +1,12 @@
 using HouseRentingSystem.Data;
+using HouseRentingSystem.Data.Entities;
+using HouseRentingSystem.Infrastructure;
 using HouseRentingSystem.Services.Agents;
 using HouseRentingSystem.Services.Houses;
+using HouseRentingSystem.Services.Statistics;
+using HouseRentingSystem.Services.Users;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace HouseRentingSystem
@@ -11,14 +16,19 @@ namespace HouseRentingSystem
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+                        
             // Add services to the container.
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            var connectionString = builder.Configuration
+                .GetConnectionString("DefaultConnection") 
+                ?? throw new InvalidOperationException
+                ("Connection string 'DefaultConnection' not found.");
+
             builder.Services.AddDbContext<HouseRentingDbContext>(options =>
                 options.UseSqlServer(connectionString));
+
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddDefaultIdentity<IdentityUser>
+            builder.Services.AddDefaultIdentity<User>
                 (options =>
                 {
                     options.SignIn.RequireConfirmedAccount = false;
@@ -27,11 +37,18 @@ namespace HouseRentingSystem
                     options.Password.RequireNonAlphanumeric = false;
                     options.Password.RequireUppercase = false;
                 })
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<HouseRentingDbContext>();
-            builder.Services.AddControllersWithViews();
+            
+            builder.Services.AddControllersWithViews(options =>
+            {
+                options.Filters.Add<AutoValidateAntiforgeryTokenAttribute>();
+            });
 
             builder.Services.AddTransient<IHouseService, HouseService>();
             builder.Services.AddTransient<IAgentService, AgentService>();
+            builder.Services.AddTransient<IStatisticsService, StatisticsService>();
+            builder.Services.AddTransient<IUserService, UserService>();
 
             var app = builder.Build();
 
@@ -47,14 +64,26 @@ namespace HouseRentingSystem
                 app.UseStatusCodePagesWithRedirects("/Home/Error?statusCode={0}");
                 app.UseHsts();
             }
-
+           
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            app.SeedAdmin();
             app.UseRouting();
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "House Details",
+                    pattern: "/Houses/Details/{id}/{information}",
+                    defaults: new { Controller = "Houses", Action = "Details" });
+
+                endpoints.MapDefaultControllerRoute();
+                endpoints.MapRazorPages();
+            });
 
             app.MapDefaultControllerRoute();
             app.MapRazorPages();

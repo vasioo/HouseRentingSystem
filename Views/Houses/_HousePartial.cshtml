@@ -1,4 +1,6 @@
 ﻿@model HouseServiceModel
+@inject IHouseService houses
+@inject IAgentService agents
 
 <div class="col-md-4">
     <div class="card mb-3">
@@ -13,22 +15,27 @@
             <h6>(@(Model.IsRented ? "Rented" : "Not Rented"))</h6>
             <br />
             <a asp-controller="Houses" asp-action="Details" asp-route-id="@Model.Id"
-               class="btn btn-success">Details</a>
+               asp-route-information="@Model.GetInformation()" class="btn btn-success">Details</a>
             @if (this.User.Identity.IsAuthenticated)
             {
-                <a asp-controller="Houses" asp-action="Edit" asp-route-id="@Model.Id"
+                @if (this.houses.HasAgentWithId(Model.Id, this.User.Id())
+                ||this.User.IsAdmin())
+                {
+                    <a asp-controller="Houses" asp-action="Edit" asp-route-id="@Model.Id"
                class="btn btn-warning">Edit</a>
-                <a asp-controller="Houses" asp-action="Delete" asp-route-id="@Model.Id"
+                    <a asp-controller="Houses" asp-action="Delete" asp-route-id="@Model.Id"
                class="btn btn-danger">Delete</a>
+                }
                 <p></p>
-                @if (!Model.IsRented)
+                @if (!Model.IsRented && !this.agents.ExistsById(this.User.Id())
+                ||this.User.IsAdmin())
                 {
                     <form class="input-group-sm" asp-controller="Houses"
-                  asp-action="Rent" asp-route-id="@Model.Id" method="post">
+                        asp-action="Rent" asp-route-id="@Model.Id" method="post">
                         <input class="btn btn-primary" type="submit" value="Rent" />
                     </form>
                 }
-                else
+                else if(this.houses.IsRentedByUserWithId(Model.Id,this.User.Id()))
                 {
                     <form asp-controller="Houses" asp-action="Leave"
                   asp-route-id="@Model.Id" method="post">
