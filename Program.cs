@@ -1,3 +1,4 @@
+using HouseRentingSystem.Controllers;
 using HouseRentingSystem.Data;
 using HouseRentingSystem.Data.Entities;
 using HouseRentingSystem.Infrastructure;
@@ -44,6 +45,10 @@ namespace HouseRentingSystem
             {
                 options.Filters.Add<AutoValidateAntiforgeryTokenAttribute>();
             });
+
+            builder.Services.AddAutoMapper(
+                typeof(IHouseService).Assembly,
+                typeof(HomeController).Assembly);
 
             builder.Services.AddTransient<IHouseService, HouseService>();
             builder.Services.AddTransient<IAgentService, AgentService>();
