@@ -7,6 +7,8 @@ using HouseRentingSystem.Services.Houses.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
+using Microsoft.Extensions.Caching.Memory;
+using static HouseRentingSystem.Web.Areas.Admin.AdminConstants;
 
 namespace HouseRentingSystem.Controllers
 {
@@ -15,13 +17,15 @@ namespace HouseRentingSystem.Controllers
         private readonly IHouseService houses;
         private readonly IAgentService agents;
         private readonly IMapper mapper;
+        private readonly IMemoryCache cache;
 
 
-        public HousesController(IHouseService houses, IAgentService agents,IMapper mapper)
+        public HousesController(IHouseService houses, IAgentService agents,IMapper mapper, IMemoryCache cache)
         {
             this.houses = houses;
             this.agents = agents;
             this.mapper = mapper;
+            this.cache = cache;
         }
 
         public IActionResult All([FromQuery] AllHousesQueryModel query)
@@ -112,9 +116,11 @@ namespace HouseRentingSystem.Controllers
 
             var agentId = this.agents.GetAgentId(this.User.Id());
 
-            var newHouseId = this.houses
-                .Create(model.Title!, model.Address!, model.Description!,
+            var newHouseId = this.houses.Create
+                (model.Title!, model.Address!, model.Description!,
                 model.ImageUrl!, model.PricePerMonth, model.CategoryId, agentId);
+
+            TempData["message"] = "You have successfully added a house";
 
             return RedirectToAction(nameof(Details),
                 new { id = newHouseId, information = model.GetInformation() });
@@ -172,6 +178,8 @@ namespace HouseRentingSystem.Controllers
                 model.ImageUrl!, model.PricePerMonth,
                 model.CategoryId);
 
+            TempData["message"] = "You have successfully edited a house";
+
             return RedirectToAction(nameof(Details),
                 new { id = id, information = model.GetInformation() });
         }
@@ -210,6 +218,7 @@ namespace HouseRentingSystem.Controllers
             }
             this.houses.Delete(model.Id);
 
+            TempData["message"] = "You have successfully deleted a house";
 
             return RedirectToAction(nameof(All));
         }
@@ -233,6 +242,11 @@ namespace HouseRentingSystem.Controllers
             }
 
             this.houses.Rent(id, this.User.Id());
+
+            TempData["message"] = "You have successfully rented a house";
+
+            this.cache.Remove(RentsCacheKey);
+
             return RedirectToAction(nameof(Mine));
         }
 
@@ -251,6 +265,9 @@ namespace HouseRentingSystem.Controllers
 
             this.houses.Leave(id);
 
+            TempData["message"] = "You have successfully left a house";
+
+            this.cache.Remove(RentsCacheKey);
             return RedirectToAction(nameof(Mine));
         }
     }

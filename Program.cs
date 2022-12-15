@@ -57,6 +57,8 @@ namespace HouseRentingSystem
             builder.Services.AddTransient<IUserService, UserService>();
             builder.Services.AddTransient<IRentService, RentService>();
 
+            builder.Services.AddMemoryCache();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

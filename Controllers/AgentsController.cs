@@ -48,6 +48,8 @@ namespace HouseRentingSystem.Controllers
                 return View(model);
             }
             this.agents.Create(userId, model.PhoneNumber);
+
+            TempData["message"] = "You have successfully became an agent";
             return RedirectToAction(nameof(HousesController.All), "Houses");
         }
     }
