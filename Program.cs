@@ -4,6 +4,7 @@ using HouseRentingSystem.Data.Entities;
 using HouseRentingSystem.Infrastructure;
 using HouseRentingSystem.Services.Agents;
 using HouseRentingSystem.Services.Houses;
+using HouseRentingSystem.Services.Rents;
 using HouseRentingSystem.Services.Statistics;
 using HouseRentingSystem.Services.Users;
 using Microsoft.AspNetCore.Identity;
@@ -54,6 +55,7 @@ namespace HouseRentingSystem
             builder.Services.AddTransient<IAgentService, AgentService>();
             builder.Services.AddTransient<IStatisticsService, StatisticsService>();
             builder.Services.AddTransient<IUserService, UserService>();
+            builder.Services.AddTransient<IRentService, RentService>();
 
             var app = builder.Build();
 
@@ -81,6 +83,9 @@ namespace HouseRentingSystem
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllerRoute(
+                    name:"Areas",
+                    pattern:"{area:exists}/{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapControllerRoute(
                     name: "House Details",
                     pattern: "/Houses/Details/{id}/{information}",
