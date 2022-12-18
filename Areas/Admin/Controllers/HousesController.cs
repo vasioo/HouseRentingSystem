@@ -23,8 +23,8 @@ namespace HouseRentingSystem.Web.Areas.Admin.Controllers
             var adminUserId = this.User.Id();
             myHouses.RentedHouses =this.houses.AllHousesByUserId(adminUserId);
 
-            var adminAgentId = this.User.GetAgentId(adminUserId);
-            myHouses.RentedHouses = this.houses.AllHousesByUserId(adminAgentId);
+            var adminAgentId = this.agents.GetAgentId(adminUserId);
+            myHouses.AddedHouses = this.houses.AllHousesByAgentId(adminAgentId);
 
             return View(myHouses);
         }
