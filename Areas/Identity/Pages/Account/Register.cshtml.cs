@@ -16,6 +16,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using static HouseRentingSystem.Data.DataConstants.User;
 using static HouseRentingSystem.Web.Areas.Admin.AdminConstants;
+
 namespace HouseRentingSystem.Areas.Identity.Pages.Account
 {
     [AllowAnonymous]
@@ -38,7 +39,6 @@ namespace HouseRentingSystem.Areas.Identity.Pages.Account
 
         [BindProperty]
         public InputModel Input { get; set; }
-
 
         public string ReturnUrl { get; set; }
 
